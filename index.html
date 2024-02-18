@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4 in a Row Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .board {
+        display: inline-block;
+        border: 6px solid #272727;
+        border-radius: 10px;
+        background-color: #4CAF50;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .row {
+        display: flex;
+    }
+
+    .cell {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin: 5px;
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+
+    .cell:hover {
+        background-color: #ccc;
+    }
+</style>
+</head>
+<body>
+
+<div class="board" id="board"></div>
+
+<script>
+    const boardElement = document.getElementById('board');
+    const rows = 6;
+    const cols = 7;
+    let currentPlayer = 1;
+    const board = Array.from(Array(rows), () => new Array(cols).fill(0));
+
+    // Create board cells
+    for (let i = 0; i < rows; i++) {
+        const row = document.createElement('div');
+        row.classList.add('row');
+        for (let j = 0; j < cols; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.dataset.column = j;
+            cell.dataset.row = i;
+            cell.addEventListener('click', () => dropDisc(j));
+            row.appendChild(cell);
+        }
+        boardElement.appendChild(row);
+    }
+
+    function dropDisc(column) {
+        for (let i = rows - 1; i >= 0; i--) {
+            if (board[i][column] === 0) {
+                board[i][column] = currentPlayer;
+                const cell = document.querySelector(`.cell[data-row='${i}'][data-column='${column}']`);
+                cell.style.backgroundColor = currentPlayer === 1 ? '#f44336' : '#ffeb3b';
+                if (checkWinner(i, column)) {
+                    alert(`Player ${currentPlayer} wins!`);
+                    resetBoard();
+                } else {
+                    currentPlayer = currentPlayer === 1 ? 2 : 1;
+                }
+                return;
+            }
+        }
+    }
+
+    function checkWinner(row, col) {
+        const directions = [[1, 0], [0, 1], [1, 1], [1, -1]]; // Horizontal, Vertical, Diagonal (both directions)
+        for (const [dx, dy] of directions) {
+            let count = 1;
+            for (let i = 1; i <= 3; i++) {
+                const newRow = row + dx * i;
+                const newCol = col + dy * i;
+                if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols || board[newRow][newCol] !== currentPlayer) break;
+                count++;
+            }
+            for (let i = 1; i <= 3; i++) {
+                const newRow = row - dx * i;
+                const newCol = col - dy * i;
+                if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols || board[newRow][newCol] !== currentPlayer) break;
+                count++;
+            }
+            if (count >= 4) return true;
+        }
+        return false;
+    }
+
+    function resetBoard() {
+        board.forEach(row => row.fill(0));
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => cell.style.backgroundColor = '#f0f0f0');
+        currentPlayer = 1;
+    }
+</script>
+
+</body>
+</html>
